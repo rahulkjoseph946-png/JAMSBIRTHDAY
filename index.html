@@ -371,31 +371,8 @@
     if(Math.random() < 0.6) spawnFall(fallChars[Math.floor(Math.random()*fallChars.length)]);
   }, 140);
 
-  /* ===== Goofy images that pop for ~2s ===== */
-  const goofyImages = [
-    "goofy1.jpg.jpg"","goofy2.jpg.jpg","goofy3.jpg.jpg","goofy4.jpg.jpg","goofy5.jpg.jpg"// <-- replace with your file names
 
-  ];
-  function showRandomGoofy(){
-    if(goofyImages.length===0) return;
-    const img = document.createElement('img');
-    img.className='goofy';
-    img.src = goofyImages[Math.floor(Math.random()*goofyImages.length)];
-    // Random position but keep inside viewport
-    const pad = 130; // keep away from very edges
-    const x = Math.random() * (window.innerWidth - pad*2) + pad;
-    const y = Math.random() * (window.innerHeight - pad*2) + pad;
-    img.style.left = x + 'px';
-    img.style.top  = y + 'px';
-    // Random cute rotation
-    img.style.setProperty('--rot', (Math.random()*16 - 8) + 'deg');
-    document.body.appendChild(img);
-    // Remove after ~2.2s (matches CSS anim total)
-    setTimeout(()=> img.remove(), 2200);
-  }
-  // one every 3s (adjust if you want more/less pics)
-  setInterval(showRandomGoofy, 3000);
-
+ 
   /* ===== Letter Modal ===== */
   const heartBtn  = document.getElementById('openHeart');
   const letter    = document.getElementById('letterModal');
@@ -439,5 +416,6 @@
 </script>
 </body>
 </html>
+
 
 
