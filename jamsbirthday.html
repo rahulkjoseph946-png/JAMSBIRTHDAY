@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Happy Birthday, My Love</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root{
+    --bg-top:#041733;
+    --bg-mid:#031024;
+    --bg-bot:#020915;
+    --accent:#ff5a8e;
+    --heart:#ff2d55;
+    --text:#e9f3ff;
+    --soft:#cfe8ff;
+    --moon:#ffd166;
+    --folder:#ffd37a;
+    --folder-edge:#e8b55d;
+    --overlay: rgba(0,0,0,.82);
+  }
+
+  html,body{height:100%}
+  body{
+    margin:0;
+    overflow:hidden;
+    background: linear-gradient(to bottom, var(--bg-top), var(--bg-mid), var(--bg-bot));
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,Helvetica,sans-serif;
+    color:var(--text);
+  }
+
+  /* Corner emojis */
+  .corner{
+    position:fixed;
+    top:14px;
+    font-size:36px;
+    z-index:20;
+    user-select:none;
+    pointer-events:none;
+    text-shadow:0 0 12px #ffffff33;
+  }
+  .corner.left{ left:14px; }
+  .corner.right{ right:14px; }
+
+  /* Heading */
+  .wish{
+    position:fixed;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+    margin:0;
+    padding:0 12px;
+    text-align:center;
+    font-weight:800;
+    font-size: clamp(24px, 4.2vw, 44px);
+    color:var(--soft);
+    letter-spacing:.5px;
+    text-shadow: 0 0 12px #9fd3ff66, 0 0 28px #4da6ff55;
+    z-index:15;
+    user-select:none;
+  }
+
+  /* Stars */
+  .star{
+    position:fixed;
+    border-radius:50%;
+    background:#fff;
+    opacity:.85;
+    z-index:1;
+    animation: twinkle 2.2s infinite alternate;
+    filter: drop-shadow(0 0 6px #ffffff66);
+  }
+  @keyframes twinkle{
+    from{ opacity:.25; transform:scale(.9); }
+    to{ opacity:1; transform:scale(1.25); }
+  }
+
+  /* Falling emojis */
+  .fall{
+    position:fixed;
+    top:-40px;
+    font-size:22px;
+    animation: fall linear forwards;
+    z-index:2;
+    user-select:none;
+    pointer-events:none;
+  }
+  @keyframes fall{
+    to{ transform: translateY(110vh) rotate(360deg); opacity:0; }
+  }
+
+  /* Center stage (heart + label) */
+  .stage{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform: translate(-50%,-42%); /* slightly lower so heading is clear */
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    z-index:10;
+    text-align:center;
+  }
+
+  /* Smooth straight heart using SVG */
+  .heart-button{
+    display:grid;
+    place-items:center;
+    cursor:pointer;
+    transition: transform .2s ease, filter .2s ease;
+    filter: drop-shadow(0 0 18px #ff5a8e55);
+    will-change: transform;
+  }
+  .heart-button:hover{ transform: scale(1.05); filter: drop-shadow(0 0 28px #ff99b388); }
+
+  .heart-svg{
+    width: clamp(160px, 28vw, 260px);
+    height: auto;
+    display:block;
+    animation: heartbeat 1.6s infinite;
+    transform-origin:center;
+  }
+  @keyframes heartbeat{
+    0%,100%{ transform: scale(1); }
+    50%{ transform: scale(1.16); }
+  }
+
+  .click-text{
+    margin-top: clamp(14px, 2.2vw, 18px);
+    font-size: clamp(16px, 2.6vw, 22px);
+    font-weight:800;
+    color:#fffbe9;
+    text-shadow: 0 0 10px #ff4d6d88, 0 0 22px #ff4d6d55;
+    user-select:none;
+  }
+
+  /* Letter Modal */
+  .modal{
+    position:fixed;
+    inset:0;
+    background: var(--overlay);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding: clamp(16px, 3vw, 36px);
+    box-sizing:border-box;
+    z-index:100;
+  }
+  .modal.show{ display:flex; }
+  .modal-card{
+    background:#0d1b2a;
+    border:1px solid #16324a;
+    border-radius:16px;
+    max-width: 820px;
+    width: min(92vw, 820px);
+    color:#e6f0ff;
+    text-align:left;
+    padding: clamp(18px, 3.2vw, 32px);
+    box-shadow: 0 0 24px var(--accent);
+    line-height:1.7;
+    font-size: clamp(16px, 1.8vw, 20px);
+    position:relative;
+    animation: pop .5s ease;
+  }
+  @keyframes pop{ from{ transform:scale(.9); opacity:0; } to{ transform:scale(1); opacity:1; } }
+  .close{
+    position:absolute; top:10px; right:14px;
+    font-size:28px; color:#c8d9ff; cursor:pointer; padding:4px 10px; border-radius:8px;
+    transition: background .2s ease, transform .1s ease;
+  }
+  .close:hover{ background:#10263a; transform: scale(1.05); }
+  .letter-body{ max-height:60vh; overflow:auto; padding-right:6px; }
+  .letter-body::-webkit-scrollbar{ width:8px; }
+  .letter-body::-webkit-scrollbar-thumb{ background:#22486b; border-radius:8px; }
+
+  /* Dustbin button */
+  .dustbin{
+    position:fixed;
+    right:22px; bottom:22px;
+    font-size:64px;
+    cursor:pointer;
+    z-index:30;
+    filter: drop-shadow(0 0 12px #00000088);
+    transition: transform .2s ease;
+  }
+  .dustbin:hover{ transform: scale(1.12); }
+
+  /* Video Folder Modal with flip-open folder */
+  .folder-modal{ /* overlay uses same .modal class for bg */
+    display:none;
+  }
+  .folder-modal.show{ display:flex; }
+
+  .folder-wrap{
+    perspective: 1200px;
+    width: min(92vw, 860px);
+  }
+  .folder{
+    position:relative;
+    background: linear-gradient(#ffe09a, var(--folder));
+    border: 2px solid var(--folder-edge);
+    border-radius: 14px;
+    box-shadow: 0 18px 40px #00000066, inset 0 2px 0 #fff3d1;
+    padding: 18px;
+    transform-style: preserve-3d;
+  }
+  .folder-flap{
+    position:absolute;
+    left:0; right:0; top:-42px;
+    height:48px;
+    margin:0 auto;
+    width: 66%;
+    background: linear-gradient(#ffe7b3, #ffcf70);
+    border: 2px solid var(--folder-edge);
+    border-bottom:none;
+    border-radius: 12px 12px 0 0;
+    transform-origin: bottom center;
+    transform: rotateX(0deg);
+    box-shadow: 0 12px 18px #00000044;
+  }
+  .folder.open .folder-flap{
+    animation: flapOpen .7s ease forwards;
+  }
+  @keyframes flapOpen {
+    to { transform: rotateX(-70deg); }
+  }
+  .folder-title{
+    margin:18px 8px 14px;
+    font-weight:900;
+    color:#2b2b2b;
+    text-shadow: 0 1px 0 #fff4c8;
+    letter-spacing:.5px;
+  }
+  .videos{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap:14px;
+  }
+  .videos video, .videos iframe{
+    width:100%; height: 200px; background:#111; border-radius:12px; outline:0; border:none;
+    box-shadow: 0 8px 18px #00000055;
+  }
+
+  /* Goofy popup images */
+  .goofy{
+    position:fixed;
+    width:110px; height:110px;
+    object-fit:cover;
+    border-radius:16px;
+    box-shadow: 0 10px 22px #00000066, 0 0 14px #ffffff55 inset;
+    opacity:0; transform: scale(.85) rotate(var(--rot, 0deg));
+    animation: popIn .25s ease forwards, fadeOut 1s ease 1.2s forwards; /* total ~2.2s on screen */
+    z-index:6;
+  }
+  @keyframes popIn{
+    to{ opacity:1; transform: scale(1) rotate(var(--rot, 0deg)); }
+  }
+  @keyframes fadeOut{
+    to{ opacity:0; transform: scale(.9) rotate(var(--rot, 0deg)); }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Corners -->
+  <div class="corner left">✨</div>
+  <div class="corner right">🌝</div>
+
+  <!-- Heading -->
+  <h1 class="wish">Happy Birthday,JAMMMMM!🌝</h1>
+
+  <!-- Center Heart + CTA -->
+  <div class="stage">
+    <div class="heart-button" id="openHeart" role="button" aria-label="Open my heart" tabindex="0">
+      <!-- Upright smooth heart via SVG -->
+      <svg class="heart-svg" viewBox="0 0 100 95" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M50 17
+                 C 40 0, 10 2, 10 30
+                 C 10 53, 33 67, 50 80
+                 C 67 67, 90 53, 90 30
+                 C 90 2, 60 0, 50 17 Z"
+              fill="url(#g)"/>
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ff6a88"/>
+            <stop offset="100%" stop-color="#ff2d55"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <div class="click-text">Click to Open!</div>
+  </div>
+
+  <!-- Letter Modal -->
+  <div class="modal" id="letterModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="letterTitle">
+      <span class="close" id="closeLetter" aria-label="Close">&times;</span>
+      <h2 id="letterTitle">💌 My Heartfelt Letter</h2>
+      <div class="letter-body" id="letterBody">
+        <p>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dustbin to open the Video Folder -->
+  <div class="dustbin" id="dustbinBtn" title="Open our video folder">🗑️</div>
+
+  <!-- Video Folder Modal -->
+  <div class="modal folder-modal" id="videoModal" aria-hidden="true">
+    <div class="folder-wrap">
+      <div class="folder" id="folder">
+        <div class="folder-flap"></div>
+        <h3 class="folder-title">HEY JAMMMM!🌝</h3>
+        <div class="videos">
+          <!-- Replace with your files; add posters if you like -->
+          
+          <video controls preload="metadata" poster="thumb2.jpg">
+            <source src="C:\Users\rahul\OneDrive\Pictures\JAMSBDAY\WhatsApp Video 2025-08-21 at 21.56.59_8c47de34.mp4" type="video/mp4" />
+                       Your browser does not support the video tag.
+          </video>
+<video controls preload="metadata" poster="thumb2.jpg">
+            <source src="C:\Users\rahul\OneDrive\Pictures\JAMSBDAY\WhatsApp Video 2025-08-21 at 21.57.06_256a87de.mp4" type="video/mp4" />
+                       Your browser does not support the video tag.
+          </video>
+<video controls preload="metadata" poster="thumb2.jpg">
+            <source src="C:\Users\rahul\OneDrive\Pictures\JAMSBDAY\WhatsApp Video 2025-08-21 at 21.57.07_661dd821.mp4" type="video/mp4" />
+                       Your browser does not support the video tag.
+          </video>
+<video controls preload="metadata" poster="thumb2.jpg">
+            <source src="C:\Users\rahul\OneDrive\Pictures\JAMSBDAY\WhatsApp Video 2025-08-21 at 21.57.14_18fc8b69.mp4" type="video/mp4" />
+                       Your browser does not support the video tag.
+          </videO>
+ </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  /* ===== Stars ===== */
+  (function createStars(n=120){
+    for(let i=0;i<n;i++){
+      const s=document.createElement('div');
+      s.className='star';
+      const size = (Math.random()*2.2 + .8);
+      s.style.width = size+'px';
+      s.style.height = size+'px';
+      s.style.top = (Math.random()*100)+'vh';
+      s.style.left = (Math.random()*100)+'vw';
+      s.style.animationDuration = (Math.random()*2 + 1.2)+'s';
+      document.body.appendChild(s);
+    }
+  })();
+
+  /* ===== Falling Emojis (denser) ===== */
+  const fallChars = ["❄️","💖","✨","💞"];
+  function spawnFall(char){
+    const el=document.createElement('div');
+    el.className='fall';
+    el.textContent=char;
+    el.style.left = (Math.random()*100)+'vw';
+    el.style.fontSize = (18 + Math.random()*16)+'px';
+    el.style.animationDuration = (2 + Math.random()*3)+'s';
+    el.style.filter = 'drop-shadow(0 0 6px #ffffff55)';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 7000);
+  }
+  // Higher density: small batch every 140ms
+  setInterval(()=>{
+    spawnFall(fallChars[Math.floor(Math.random()*fallChars.length)]);
+    if(Math.random() < 0.6) spawnFall(fallChars[Math.floor(Math.random()*fallChars.length)]);
+  }, 140);
+
+  /* ===== Goofy images that pop for ~2s ===== */
+  const goofyImages = [
+    "goofy1.jpg","goofy2.jpg","goofy3.jpg","goofy4.jpg","goofy4.jpg","goofy6.jpg","goofy7.jpg"// <-- replace with your file names
+
+  ];
+  function showRandomGoofy(){
+    if(goofyImages.length===0) return;
+    const img = document.createElement('img');
+    img.className='goofy';
+    img.src = goofyImages[Math.floor(Math.random()*goofyImages.length)];
+    // Random position but keep inside viewport
+    const pad = 130; // keep away from very edges
+    const x = Math.random() * (window.innerWidth - pad*2) + pad;
+    const y = Math.random() * (window.innerHeight - pad*2) + pad;
+    img.style.left = x + 'px';
+    img.style.top  = y + 'px';
+    // Random cute rotation
+    img.style.setProperty('--rot', (Math.random()*16 - 8) + 'deg');
+    document.body.appendChild(img);
+    // Remove after ~2.2s (matches CSS anim total)
+    setTimeout(()=> img.remove(), 2200);
+  }
+  // one every 3s (adjust if you want more/less pics)
+  setInterval(showRandomGoofy, 3000);
+
+  /* ===== Letter Modal ===== */
+  const heartBtn  = document.getElementById('openHeart');
+  const letter    = document.getElementById('letterModal');
+  const closeLetter = document.getElementById('closeLetter');
+
+  function openLetter(){
+    letter.classList.add('show');
+    letter.setAttribute('aria-hidden','false');
+  }
+  function hideLetter(){
+    letter.classList.remove('show');
+    letter.setAttribute('aria-hidden','true');
+  }
+  heartBtn.addEventListener('click', openLetter);
+  heartBtn.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') openLetter(); });
+  closeLetter.addEventListener('click', hideLetter);
+  letter.addEventListener('click', (e)=>{ if(e.target===letter) hideLetter(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') { hideLetter(); closeVideoFolder(); } });
+
+  /* ===== Video Folder (Dustbin) ===== */
+  const videoModal = document.getElementById('videoModal');
+  const dustbinBtn = document.getElementById('dustbinBtn');
+  const folder     = document.getElementById('folder');
+
+  function openVideoFolder(){
+    videoModal.classList.add('show');
+    videoModal.setAttribute('aria-hidden','false');
+    // trigger flap open animation
+    folder.classList.remove('open'); // reset
+    // small timeout to allow reflow so animation plays every time
+    setTimeout(()=> folder.classList.add('open'), 30);
+  }
+  function closeVideoFolder(){
+    videoModal.classList.remove('show');
+    videoModal.setAttribute('aria-hidden','true');
+    folder.classList.remove('open');
+  }
+  dustbinBtn.addEventListener('click', openVideoFolder);
+  videoModal.addEventListener('click', (e)=>{ if(e.target===videoModal) closeVideoFolder(); });
+
+</script>
+</body>
+</html>
